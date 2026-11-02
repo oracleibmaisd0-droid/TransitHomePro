@@ -1,0 +1,1876 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planetas por casas astrológicas</title>
+
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#090d16;
+  --panel:#111827;
+  --panel2:#172235;
+  --text:#e8eef8;
+  --muted:#8d9bb0;
+  --accent:#00d9ff;
+  --border:rgba(255,255,255,.09);
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  padding:20px;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+
+main {
+  max-width:1100px;
+  margin:auto;
+}
+
+h1 {
+  font-size:24px;
+  margin:5px 0 8px;
+}
+
+h2 {
+  font-size:17px;
+  margin:0 0 16px;
+}
+
+.description {
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+  margin-bottom:22px;
+}
+
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:17px;
+  margin-bottom:16px;
+}
+
+.form-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+
+.field {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  min-width:0;
+}
+
+.field.full {
+  grid-column:1/-1;
+}
+
+label {
+  font-size:12px;
+  color:var(--muted);
+}
+
+input,select,button {
+  width:100%;
+  min-height:43px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:10px;
+  background:var(--panel2);
+  color:var(--text);
+  font-size:14px;
+}
+
+button {
+  cursor:pointer;
+  background:#d9ad58;
+  border-color:#d9ad58;
+  font-weight:bold;
+  color:#ffffff;
+}
+
+button:disabled {
+  opacity:.5;
+  cursor:wait;
+}
+
+.suggestions {
+  display:none;
+  position:relative;
+  background:#1b293d;
+  border:1px solid var(--border);
+  border-radius:9px;
+  overflow:hidden;
+  margin-top:5px;
+}
+
+.suggestion {
+  display:block;
+  width:100%;
+  text-align:left;
+  border:0;
+  border-radius:0;
+  border-bottom:1px solid var(--border);
+  background:transparent;
+  padding:12px;
+  font-weight:normal;
+  min-height:auto;
+}
+
+.suggestion:last-child {
+  border-bottom:0;
+}
+
+.suggestion:hover {
+  background:#263b55;
+}
+
+.status {
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+  margin-top:13px;
+  white-space:pre-wrap;
+}
+
+.status.error {
+  color:#ff7777;
+}
+
+.status.success {
+  color:#54dfa5;
+}
+
+.status.warning {
+  color:#ffcb70;
+}
+
+.status.info {
+  color: #2196f3;
+}
+
+.chart-scroll {
+  overflow-x:auto;
+  width:100%;
+}
+
+#chart {
+  display:block;
+  width:100%;
+  min-width:650px;
+  height:auto;
+}
+
+.legend {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+  gap:10px;
+  margin-top:15px;
+}
+
+.legend-item {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:var(--muted);
+}
+
+.legend-color {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+
+.events {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  max-height:350px;
+  overflow-y:auto;
+}
+
+.event {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  background:var(--panel2);
+  padding:10px;
+  border-radius:9px;
+  font-size:12px;
+}
+
+.event-name {
+  font-weight:bold;
+}
+
+.event-date {
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.note {
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+  margin-top:13px;
+}
+
+/* =========================================
+   POSICIONES PLANETARIAS DEL MES
+========================================= */
+
+.monthly-controls {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.monthly-planet {
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:9px;
+}
+
+.monthly-planet-title {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-size:14px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.monthly-planet-symbol {
+  font-size:20px;
+}
+
+.monthly-positions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.monthly-position-link {
+  display:inline-flex;
+  flex-direction:column;
+  gap:4px;
+  text-decoration:none;
+  color:var(--text);
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:9px 11px;
+  font-size:12px;
+  transition:background .2s,border-color .2s;
+}
+
+.monthly-position-link:hover {
+  background:rgba(0,217,255,.12);
+  border-color:var(--accent);
+}
+
+.monthly-position-house {
+  font-weight:bold;
+}
+
+.monthly-position-date {
+  color:var(--muted);
+  font-size:11px;
+}
+
+.monthly-empty {
+  color:var(--muted);
+  font-size:13px;
+  padding:12px 0;
+}
+
+@media(max-width:600px) {
+  .monthly-position-link {
+    flex:1 1 120px;
+  }
+}
+
+@media(max-width:600px) {
+  body {
+    padding:12px;
+  }
+
+  .form-grid {
+    grid-template-columns:1fr;
+  }
+
+  .field.full {
+    grid-column:auto;
+  }
+}
+
+h1 {
+    text-align:center;
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<h1>Planetas por casas astrológicas</h1>
+
+<div class="description">
+  Evolución de los planetas por las doce casas en la carta natal.
+  Las barras muestran la casa ocupada durante el año y los cambios
+  de posición, incluidas las retrogradaciones.
+</div>
+
+<section class="panel">
+
+<h2>Datos de nacimiento</h2>
+
+<div class="form-grid">
+
+  <div class="field">
+    <label for="birthDate">Fecha de nacimiento</label>
+    <input type="date" id="birthDate" value="">
+  </div>
+
+  <div class="field">
+    <label for="birthTime">Hora de nacimiento</label>
+    <input type="time" id="birthTime" value="">
+  </div>
+
+  <div class="field full">
+    <label for="place">Localidad natal</label>
+    <input
+      type="text"
+      id="place"
+      placeholder="Escribe una localidad..."
+      autocomplete="off"
+    >
+    <div id="suggestions" class="suggestions"></div>
+    <div id="selectedPlace" class="note">
+      Debe seleccionar una localidad de las sugerencias. <font color="red">Si no conoce la hora de nacimiento, esta herramienta no servirá, ya que 5 minutos de diferencia puede alterar el resultado.</font>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="houseSystem">Sistema de casas</label>
+    <select id="houseSystem">
+      <option value="P">Placidus</option>
+      <option value="W">Casas iguales por signo (Whole Sign)</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="year">Año de consulta</label>
+    <input
+      type="number"
+      id="year"
+      min="1800"
+      max="2500"
+      step="1"
+    >
+  </div>
+
+  <div class="field full">
+    <button id="calculate">Calcular casas</button>
+  </div>
+
+</div>
+
+<div id="status" class="status">
+  Introduce tus datos y selecciona una localidad.
+</div>
+
+</section>
+
+<section class="panel">
+
+<h2>Tránsitos por casas</h2>
+
+<div id="chartInfo" class="note">
+  Esperamdo datos de nacimiento.
+</div>
+
+<div class="chart-scroll">
+  <svg id="chart"
+       viewBox="0 0 1000 530"
+       xmlns="http://www.w3.org/2000/svg">
+  </svg>
+</div>
+
+<div id="legend" class="legend"></div>
+
+<div class="note">
+  Cada línea representa la trayectoria de un planeta por las casas
+  natales. Los cambios se detectan mediante muestras diarias.
+  Por tanto, la fecha del cambio puede tener un margen aproximado
+  de un día. Una línea discontinua indica movimiento retrógrado.
+</div>
+
+</section>
+
+<!-- =========================================
+     POSICIONES PLANETARIAS DEL MES
+========================================= -->
+
+<section class="panel" id="monthlyPositions">
+
+  <h2>Posiciones planetarias del mes</h2>
+
+  <div class="monthly-controls">
+
+    <div class="field">
+      <label for="monthSelect">Mes de consulta</label>
+
+      <select id="monthSelect">
+        <option value="0">Enero</option>
+        <option value="1">Febrero</option>
+        <option value="2">Marzo</option>
+        <option value="3">Abril</option>
+        <option value="4">Mayo</option>
+        <option value="5">Junio</option>
+        <option value="6">Julio</option>
+        <option value="7">Agosto</option>
+        <option value="8">Septiembre</option>
+        <option value="9">Octubre</option>
+        <option value="10">Noviembre</option>
+        <option value="11">Diciembre</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div id="monthlyStatus" class="status info">
+    Calcula primero los tránsitos anuales para consultar las posiciones.
+  </div>
+
+  <div id="monthlyResults"></div>
+
+  <div class="note">
+    Selecciona una posición planetaria para abrir su interpretación
+    correspondiente en Grupo Venus. Las fechas se estiman mediante
+    las muestras diarias de la gráfica anual.
+  </div>
+
+</section>
+
+<section class="panel">
+
+<h2>Cambios de casa encontrados</h2>
+
+<div id="events" class="events">
+  <div class="note">Todavía no hay resultados.</div>
+</div>
+
+</section>
+
+</main>
+
+<script>
+"use strict";
+
+/* =========================================
+   CONFIGURACIÓN
+========================================= */
+
+const API =
+  "https://swiss-ephemeris-engine.onrender.com";
+
+const GEOCODING =
+  "https://geocoding-api.open-meteo.com/v1/search";
+
+const PLANETS = [
+  "Moon",
+  "Sun",
+  "Mercury",
+  "Venus",
+  "Mars",
+  "Jupiter",
+  "Saturn",
+  "Uranus",
+  "Neptune",
+  "Pluto"
+];
+
+const PLANET_NAMES = {
+  Moon:"Luna",
+  Sun:"Sol",
+  Mercury:"Mercurio",
+  Venus:"Venus",
+  Mars:"Marte",
+  Jupiter:"Júpiter",
+  Saturn:"Saturno",
+  Uranus:"Urano",
+  Neptune:"Neptuno",
+  Pluto:"Plutón"
+};
+
+const COLORS = {
+  Sun:"#ffff00",
+  Moon:"#ffffff",
+  Mercury:"#ff7f00",
+  Venus:"#00ff00",
+  Mars:"#ff0000",
+  Jupiter:"#00ffff",
+  Saturn:"#ff5f5f",
+  Uranus:"#0000ff",
+  Neptune:"#ff00ff",
+  Pluto:"#EF5F00"
+};
+
+const MONTHS = [
+  "Ene","Feb","Mar","Abr","May","Jun",
+  "Jul","Ago","Sep","Oct","Nov","Dic"
+];
+
+const PLANET_CODES = {
+  Sun:"SOL",
+  Moon:"LUN",
+  Mercury:"MER",
+  Venus:"VEN",
+  Mars:"MAR",
+  Jupiter:"JUP",
+  Saturn:"SAT",
+  Uranus:"URA",
+  Neptune:"NEP",
+  Pluto:"PLU"
+};
+
+const PLANET_SYMBOLS = {
+  Sun:"☉",
+  Moon:"☽",
+  Mercury:"☿",
+  Venus:"♀",
+  Mars:"♂",
+  Jupiter:"♃",
+  Saturn:"♄",
+  Uranus:"♅",
+  Neptune:"♆",
+  Pluto:"♇"
+};
+
+const $ = id => document.getElementById(id);
+
+let selectedLocation = null;
+let searchTimeout = null;
+let lastSearch = 0;
+
+let annualData = null;
+let calculatedYear = null;
+
+
+/* =========================================
+   AÑO ACTUAL
+========================================= */
+
+$("year").value = new Date().getFullYear();
+
+$("monthSelect").value =
+  String(new Date().getMonth());
+
+
+/* =========================================
+   BUSCADOR DE LOCALIDADES
+========================================= */
+
+$("place").addEventListener("input", () => {
+
+  clearTimeout(searchTimeout);
+
+  const query = $("place").value.trim();
+
+  selectedLocation = null;
+
+  $("selectedPlace").textContent =
+    "Selecciona una localidad de las sugerencias.";
+
+  if(query.length < 2) {
+    $("suggestions").style.display = "none";
+    return;
+  }
+
+  searchTimeout = setTimeout(
+    () => searchPlaces(query),
+    350
+  );
+});
+
+
+async function searchPlaces(query) {
+
+  const requestId = ++lastSearch;
+
+  try {
+
+    const url =
+      GEOCODING +
+      "?name=" + encodeURIComponent(query) +
+      "&count=7&language=es&format=json";
+
+    const response = await fetch(url);
+
+    if(!response.ok) {
+      throw new Error("No se pudo consultar Open-Meteo.");
+    }
+
+    const data = await response.json();
+
+    if(requestId !== lastSearch) return;
+
+    const results = data.results || [];
+    const container = $("suggestions");
+
+    container.innerHTML = "";
+
+    if(!results.length) {
+      container.innerHTML =
+        '<div class="suggestion">No se encontraron localidades.</div>';
+
+      container.style.display = "block";
+      return;
+    }
+
+    results.forEach(place => {
+
+      const button = document.createElement("button");
+
+      button.type = "button";
+      button.className = "suggestion";
+
+      const parts = [
+        place.name,
+        place.admin1,
+        place.country
+      ].filter(Boolean);
+
+      button.textContent = [...new Set(parts)].join(", ");
+
+      button.addEventListener("click", () => {
+        choosePlace(place);
+      });
+
+      container.appendChild(button);
+
+    });
+
+    container.style.display = "block";
+
+  } catch(error) {
+
+    setStatus(
+      "Error buscando localidades: " + error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+async function choosePlace(place) {
+
+  selectedLocation = {
+    latitude:Number(place.latitude),
+    longitude:Number(place.longitude),
+    name:place.name,
+    country:place.country || "",
+    timezone:place.timezone || null
+  };
+
+  $("place").value =
+    [place.name,place.country].filter(Boolean).join(", ");
+
+  $("suggestions").style.display = "none";
+
+  $("selectedPlace").textContent =
+    "Localidad seleccionada: " +
+    $("place").value +
+    " · " +
+    selectedLocation.latitude.toFixed(4) +
+    ", " +
+    selectedLocation.longitude.toFixed(4);
+
+  setStatus("Obteniendo zona horaria de la localidad...","info");
+
+  try {
+
+    const url =
+      "https://api.open-meteo.com/v1/forecast" +
+      "?latitude=" + selectedLocation.latitude +
+      "&longitude=" + selectedLocation.longitude +
+      "&current=temperature_2m&timezone=auto";
+
+    const response = await fetch(url);
+
+    if(!response.ok) {
+      throw new Error("No se pudo obtener la zona horaria.");
+    }
+
+    const data = await response.json();
+
+    if(data.timezone) {
+      selectedLocation.timezone = data.timezone;
+    }
+
+    if(!selectedLocation.timezone) {
+      selectedLocation.timezone =
+        Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+
+    $("selectedPlace").textContent +=
+      " · Zona horaria: " + selectedLocation.timezone;
+
+    setStatus("Localidad y zona horaria seleccionadas.");
+
+  } catch(error) {
+
+    selectedLocation.timezone =
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      "Europe/Madrid";
+
+    setStatus(
+      "No se pudo detectar la zona horaria automáticamente. " +
+      "Se utilizará la zona horaria del dispositivo: " +
+      selectedLocation.timezone,
+      "warning"
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   CONVERSIÓN DE HORA LOCAL A UTC
+========================================= */
+
+function localBirthToUTC(dateValue,timeValue,timeZone) {
+
+  const [year,month,day] =
+    dateValue.split("-").map(Number);
+
+  const [hour,minute] =
+    timeValue.split(":").map(Number);
+
+  const target = Date.UTC(
+    year,
+    month-1,
+    day,
+    hour,
+    minute,
+    0
+  );
+
+  let result = target;
+
+  const formatter = new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      timeZone,
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit",
+      hour:"2-digit",
+      minute:"2-digit",
+      second:"2-digit",
+      hourCycle:"h23"
+    }
+  );
+
+  for(let i=0;i<4;i++) {
+
+    const parts = formatter.formatToParts(
+      new Date(result)
+    );
+
+    const values = {};
+
+    parts.forEach(part => {
+      if(part.type !== "literal") {
+        values[part.type] = Number(part.value);
+      }
+    });
+
+    const represented = Date.UTC(
+      values.year,
+      values.month-1,
+      values.day,
+      values.hour,
+      values.minute,
+      values.second
+    );
+
+    result += target-represented;
+
+  }
+
+  return new Date(result);
+
+}
+
+
+/* =========================================
+   PETICIONES API
+========================================= */
+
+async function fetchJSON(url) {
+
+  let lastError;
+
+  for(let attempt=0;attempt<3;attempt++) {
+
+    try {
+
+      const controller = new AbortController();
+
+      const timeout = setTimeout(
+        () => controller.abort(),
+        30000
+      );
+
+      const response = await fetch(url,{
+        signal:controller.signal
+      });
+
+      clearTimeout(timeout);
+
+      const text = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          "La API no devolvió JSON válido: " +
+          text.slice(0,200)
+        );
+      }
+
+      if(!response.ok) {
+        throw new Error(
+          "Error HTTP " + response.status +
+          ": " + JSON.stringify(data).slice(0,250)
+        );
+      }
+
+      return data;
+
+    } catch(error) {
+
+      lastError = error;
+
+      if(attempt < 2) {
+        await new Promise(resolve =>
+          setTimeout(resolve,1000*(attempt+1))
+        );
+      }
+
+    }
+
+  }
+
+  throw lastError;
+
+}
+
+
+/* =========================================
+   OBTENER CÚSPIDES NATALES
+========================================= */
+
+function extractCusps(data) {
+
+  let raw =
+    data.houses?.cusps ??
+    data.cusps ??
+    data.house_cusps ??
+    data.houses;
+
+  if(!Array.isArray(raw)) {
+    throw new Error(
+      "No se encontraron las cúspides en la respuesta de casas."
+    );
+  }
+
+  const cusps = raw.map(item => {
+
+    if(typeof item === "number") {
+      return item;
+    }
+
+    if(typeof item === "object" && item !== null) {
+
+      return Number(
+        item.longitude ??
+        item.cusp ??
+        item.position ??
+        item.degree
+      );
+
+    }
+
+    return Number(item);
+
+  });
+
+  if(cusps.length === 13 && cusps[0] === 0) {
+    cusps.shift();
+  }
+
+  if(cusps.length !== 12 ||
+     cusps.some(value => !Number.isFinite(value))) {
+
+    throw new Error(
+      "Las cúspides recibidas no contienen 12 longitudes válidas. " +
+      JSON.stringify(raw).slice(0,300)
+    );
+
+  }
+
+  return cusps.map(value =>
+    ((value%360)+360)%360
+  );
+
+}
+
+
+async function getNatalCusps() {
+
+  const date = $("birthDate").value;
+  const time = $("birthTime").value;
+
+  if(!date || !time) {
+    throw new Error("Introduce la fecha y hora de nacimiento.");
+  }
+
+  const birthUTC = localBirthToUTC(
+    date,
+    time,
+    selectedLocation.timezone
+  );
+
+  const params = new URLSearchParams({
+    datetime:birthUTC.toISOString(),
+    lat:String(selectedLocation.latitude),
+    lon:String(selectedLocation.longitude),
+    hsys:$("houseSystem").value,
+    tropical:"true"
+  });
+
+  const data = await fetchJSON(
+    API + "/v1/houses?" + params.toString()
+  );
+
+  return extractCusps(data);
+
+}
+
+
+/* =========================================
+   OBTENER POSICIONES PLANETARIAS
+========================================= */
+
+function extractPlanets(data) {
+
+  const raw =
+    data.planets ??
+    data.positions ??
+    data;
+
+  const result = {};
+
+  PLANETS.forEach(name => {
+
+    let item =
+      raw[name] ??
+      raw[name.toLowerCase()];
+
+    if(!item && Array.isArray(raw)) {
+
+      item = raw.find(entry => {
+
+        const key =
+          entry.name ??
+          entry.planet ??
+          entry.body;
+
+        return String(key).toLowerCase() ===
+          name.toLowerCase();
+
+      });
+
+    }
+
+    if(item === undefined || item === null) {
+      return;
+    }
+
+    const longitude =
+      typeof item === "number"
+        ? item
+        : Number(
+            item.longitude ??
+            item.lon ??
+            item.longitude_deg ??
+            item.position?.longitude
+          );
+
+    if(!Number.isFinite(longitude)) {
+      return;
+    }
+
+    const speed = Number(
+      item.speed_longitude ??
+      item.longitude_speed ??
+      item.speed ??
+      0
+    );
+
+    result[name] = {
+      longitude:((longitude%360)+360)%360,
+      retrograde:
+        item.is_retrograde ??
+        item.retrograde ??
+        (Number.isFinite(speed) && speed < 0)
+    };
+
+  });
+
+  return result;
+
+}
+
+
+async function getPlanetPositions(date) {
+
+  const params = new URLSearchParams({
+    datetime:date.toISOString(),
+    tropical:"true"
+  });
+
+  const data = await fetchJSON(
+    API + "/v1/planets?" + params.toString()
+  );
+
+  const planets = extractPlanets(data);
+
+  const missing = PLANETS.filter(
+    name => !planets[name]
+  );
+
+  if(missing.length) {
+
+    throw new Error(
+      "No se encontraron las longitudes de: " +
+      missing.join(", ") +
+      ". Respuesta recibida: " +
+      JSON.stringify(data).slice(0,500)
+    );
+
+  }
+
+  return planets;
+
+}
+
+
+/* =========================================
+   DETERMINAR CASA DE UN PLANETA
+========================================= */
+
+function getHouse(longitude,cusps) {
+
+  const lon = ((longitude%360)+360)%360;
+
+  for(let i=0;i<12;i++) {
+
+    const start = cusps[i];
+    const end = cusps[(i+1)%12];
+
+    let inside;
+
+    if(start < end) {
+      inside = lon >= start && lon < end;
+    } else {
+      inside = lon >= start || lon < end;
+    }
+
+    if(inside) {
+      return i+1;
+    }
+
+  }
+
+  return 12;
+
+}
+
+
+/* =========================================
+   CALCULAR TRÁNSITOS ANUALES
+========================================= */
+
+async function calculateYear(cusps,year) {
+
+  const start = new Date(
+    Date.UTC(year,0,1,12,0,0)
+  );
+
+  const end = new Date(
+    Date.UTC(year+1,0,1,12,0,0)
+  );
+
+  const dates = [];
+
+  for(let date=new Date(start);
+      date<end;
+      date.setUTCDate(date.getUTCDate()+1)) {
+
+    dates.push(new Date(date));
+
+  }
+
+  const result = [];
+
+  let completed = 0;
+  const concurrency = 4;
+
+  for(let i=0;i<dates.length;i+=concurrency) {
+
+    const batch = dates.slice(i,i+concurrency);
+
+    const responses = await Promise.all(
+      batch.map(async date => {
+
+        const positions = await getPlanetPositions(date);
+
+        const sample = {
+          date,
+          planets:{}
+        };
+
+        PLANETS.forEach(name => {
+
+          const position = positions[name];
+
+          sample.planets[name] = {
+            longitude:position.longitude,
+            house:getHouse(position.longitude,cusps),
+            retrograde:position.retrograde
+          };
+
+        });
+
+        return sample;
+
+      })
+    );
+
+    result.push(...responses);
+
+    completed += batch.length;
+
+    setStatus(
+      "Calculando posiciones planetarias: " +
+      completed + " de " + dates.length +
+      " días (" +
+      Math.round(completed/dates.length*100) +
+      "%).",
+      "info"
+    );
+
+  }
+
+  return result;
+
+}
+
+
+/* =========================================
+   GENERAR GRÁFICA SVG
+========================================= */
+
+function renderChart(data,year) {
+
+  const svg = $("chart");
+
+  const width = 1000;
+  const height = 530;
+
+  const left = 100;
+  const right = 980;
+  const top = 35;
+  const bottom = 445;
+
+  const plotWidth = right-left;
+  const plotHeight = bottom-top;
+
+  const total = data.length-1;
+
+  const x = index =>
+    left+(index/total)*plotWidth;
+
+  const y = house =>
+    top+((house-1)/11)*plotHeight;
+
+  let html = `
+    <rect
+      x="${left}"
+      y="${top}"
+      width="${plotWidth}"
+      height="${plotHeight}"
+      fill="none"
+      stroke="rgba(255,255,255,.15)"
+    />
+  `;
+
+  /* Filas de casas */
+
+  for(let house=1;house<=12;house++) {
+
+    const yy = y(house);
+
+    html += `
+      <line
+        x1="${left}"
+        y1="${yy}"
+        x2="${right}"
+        y2="${yy}"
+        stroke="rgba(255,255,255,.13)"
+        stroke-dasharray="3 5"
+      />
+
+      <text
+        x="${left-12}"
+        y="${yy+4}"
+        fill="#a9b6c9"
+        font-size="12"
+        text-anchor="end"
+      >Casa ${house}</text>
+    `;
+
+  }
+
+  /* Meses */
+
+  for(let month=0;month<12;month++) {
+
+    const index = data.findIndex(sample =>
+      sample.date.getUTCMonth() === month &&
+      sample.date.getUTCDate() === 1
+    );
+
+    if(index < 0) continue;
+
+    const xx = x(index);
+
+    html += `
+      <line
+        x1="${xx}"
+        y1="${top}"
+        x2="${xx}"
+        y2="${bottom}"
+        stroke="rgba(255,255,255,.12)"
+      />
+
+      <text
+        x="${xx+3}"
+        y="${bottom+22}"
+        fill="#a9b6c9"
+        font-size="11"
+      >${MONTHS[month]}</text>
+    `;
+
+  }
+
+  /* Líneas planetarias */
+
+  PLANETS.forEach(name => {
+
+    const color = COLORS[name];
+
+    let path = "";
+    let retroPath = "";
+    let previous = null;
+
+    data.forEach((sample,index) => {
+
+      const current = sample.planets[name];
+
+      const xx = x(index);
+      const yy = y(current.house);
+
+      if(!previous) {
+
+        path = `M ${xx} ${yy}`;
+
+      } else {
+
+        const previousX = x(index-1);
+        const previousY = y(previous.house);
+
+        path += ` H ${xx} V ${yy}`;
+
+        if(previous.retrograde || current.retrograde) {
+
+          retroPath +=
+            `M ${previousX} ${previousY}` +
+            ` H ${xx} V ${yy} `;
+
+        }
+
+      }
+
+      previous = current;
+
+    });
+
+    html += `
+      <path
+        d="${path}"
+        fill="none"
+        stroke="${color}"
+        stroke-width="2.3"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        opacity=".9"
+      />
+    `;
+
+    if(retroPath) {
+
+      html += `
+        <path
+          d="${retroPath}"
+          fill="none"
+          stroke="${color}"
+          stroke-width="3.3"
+          stroke-dasharray="4 4"
+          stroke-linejoin="round"
+          opacity="1"
+        />
+      `;
+
+    }
+
+  });
+
+  /* Etiquetas */
+
+  html += `
+    <text
+      x="${left}"
+      y="500"
+      fill="#8d9bb0"
+      font-size="12"
+    >${year}</text>
+
+    <text
+      x="${right}"
+      y="500"
+      fill="#8d9bb0"
+      font-size="12"
+      text-anchor="end"
+    >Evolución anual · Casas natales</text>
+  `;
+
+  svg.innerHTML = html;
+
+  svg.setAttribute("viewBox",
+    `0 0 ${width} ${height}`
+  );
+
+  renderLegend();
+
+  $("chartInfo").textContent =
+    "Año " + year +
+    " · " + data.length +
+    " muestras diarias · 12 casas natales.";
+
+}
+
+
+/* =========================================
+   LEYENDA
+========================================= */
+
+function renderLegend() {
+
+  $("legend").innerHTML = "";
+
+  PLANETS.forEach(name => {
+
+    const item = document.createElement("div");
+
+    item.className = "legend-item";
+
+    item.innerHTML = `
+      <span
+        class="legend-color"
+        style="background:${COLORS[name]}"
+      ></span>
+      <span>${PLANET_NAMES[name]}</span>
+    `;
+
+    $("legend").appendChild(item);
+
+  });
+
+}
+
+
+/* =========================================
+   DETECTAR CAMBIOS DE CASA
+========================================= */
+
+function renderEvents(data) {
+
+  const events = [];
+
+  PLANETS.forEach(name => {
+
+    for(let i=1;i<data.length;i++) {
+
+      const previous = data[i-1].planets[name];
+      const current = data[i].planets[name];
+
+      if(previous.house !== current.house) {
+
+        events.push({
+          name,
+          date:data[i].date,
+          from:previous.house,
+          to:current.house,
+          retrograde:current.retrograde
+        });
+
+      }
+
+    }
+
+  });
+
+  events.sort((a,b) =>
+    a.date-b.date
+  );
+
+  const container = $("events");
+
+  container.innerHTML = "";
+
+  if(!events.length) {
+
+    container.innerHTML =
+      '<div class="note">No se han detectado cambios de casa.</div>';
+
+    return;
+
+  }
+
+  events.forEach(event => {
+
+    const div = document.createElement("div");
+
+    div.className = "event";
+
+    const date = event.date.toLocaleDateString(
+      "es-ES",
+      {
+        day:"2-digit",
+        month:"short",
+        timeZone:"UTC"
+      }
+    );
+
+    div.innerHTML = `
+      <span>
+        <span
+          class="event-name"
+          style="color:${COLORS[event.name]}"
+        >${PLANET_NAMES[event.name]}</span>
+        · Casa ${event.from} → Casa ${event.to}
+        ${event.retrograde ? " · ℞" : ""}
+      </span>
+      <span class="event-date">${date}</span>
+    `;
+
+    container.appendChild(div);
+
+  });
+
+}
+
+/* =========================================
+   POSICIONES PLANETARIAS DEL MES
+========================================= */
+
+function formatMonthlyDate(date) {
+
+  return date.toLocaleDateString(
+    "es-ES",
+    {
+      day:"2-digit",
+      month:"short",
+      timeZone:"UTC"
+    }
+  );
+
+}
+
+
+function createGroupVenusURL(planet,house) {
+
+  const params = new URLSearchParams({
+    tabla:"tratsp",
+    cla:PLANET_CODES[planet] + "en " + house,
+    ORB:"99",
+    idioma:"E",
+    sexo:"V"
+  });
+
+  return "https://grupovenus.com/sacainter.asp?" +
+    params.toString();
+
+}
+
+
+function renderMonthlyPositions(data,year,month) {
+
+  const container = $("monthlyResults");
+  const status = $("monthlyStatus");
+
+  container.innerHTML = "";
+
+  if(!data || !data.length) {
+
+    status.textContent =
+      "Todavía no hay datos anuales calculados.";
+
+    return;
+
+  }
+
+  const samples = data.filter(sample =>
+    sample.date.getUTCFullYear() === year &&
+    sample.date.getUTCMonth() === month
+  );
+
+  if(!samples.length) {
+
+    status.textContent =
+      "No hay muestras disponibles para este mes.";
+
+    return;
+
+  }
+
+  const monthName = new Date(
+    Date.UTC(year,month,1)
+  ).toLocaleDateString(
+    "es-ES",
+    {
+      month:"long",
+      year:"numeric",
+      timeZone:"UTC"
+    }
+  );
+
+  status.textContent =
+    "Posiciones planetarias correspondientes a " +
+    monthName + ".";
+
+  PLANETS.forEach(name => {
+
+    const segments = [];
+    let currentSegment = null;
+
+    samples.forEach(sample => {
+
+      const position = sample.planets[name];
+
+      if(!position) return;
+
+      if(
+        !currentSegment ||
+        currentSegment.house !== position.house
+      ) {
+
+        if(currentSegment) {
+          segments.push(currentSegment);
+        }
+
+        currentSegment = {
+          house:position.house,
+          start:sample.date,
+          end:sample.date,
+          retrograde:position.retrograde
+        };
+
+      } else {
+
+        currentSegment.end = sample.date;
+
+        if(position.retrograde) {
+          currentSegment.retrograde = true;
+        }
+
+      }
+
+    });
+
+    if(currentSegment) {
+      segments.push(currentSegment);
+    }
+
+    const planetCard = document.createElement("div");
+
+    planetCard.className = "monthly-planet";
+
+    const title = document.createElement("div");
+
+    title.className = "monthly-planet-title";
+
+    const symbol = document.createElement("span");
+
+    symbol.className = "monthly-planet-symbol";
+    symbol.textContent = PLANET_SYMBOLS[name];
+    symbol.style.color = COLORS[name];
+
+    const planetName = document.createElement("span");
+
+    planetName.textContent = PLANET_NAMES[name];
+
+    title.appendChild(symbol);
+    title.appendChild(planetName);
+
+    const positions = document.createElement("div");
+
+    positions.className = "monthly-positions";
+
+    segments.forEach(segment => {
+
+      const link = document.createElement("a");
+
+      link.className = "monthly-position-link";
+
+      link.href = createGroupVenusURL(
+        name,
+        segment.house
+      );
+
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+
+      const house = document.createElement("span");
+
+      house.className = "monthly-position-house";
+
+      house.textContent =
+        "Casa " + segment.house +
+        (segment.retrograde ? " ℞" : "");
+
+      const dates = document.createElement("span");
+
+      dates.className = "monthly-position-date";
+
+      if(
+        segment.start.getTime() ===
+        segment.end.getTime()
+      ) {
+
+        dates.textContent =
+          formatMonthlyDate(segment.start);
+
+      } else {
+
+        dates.textContent =
+          formatMonthlyDate(segment.start) +
+          " – " +
+          formatMonthlyDate(segment.end);
+
+      }
+
+      link.appendChild(house);
+      link.appendChild(dates);
+
+      link.title =
+        PLANET_NAMES[name] +
+        " en casa " + segment.house +
+        " · Abrir interpretación en Grupo Venus";
+
+      positions.appendChild(link);
+
+    });
+
+    planetCard.appendChild(title);
+    planetCard.appendChild(positions);
+
+    container.appendChild(planetCard);
+
+  });
+
+}
+
+/* =========================================
+   BOTÓN PRINCIPAL
+========================================= */
+
+function setStatus(message,type="info") {
+
+  const status = $("status");
+
+  status.textContent = message;
+  status.className = "status " + type;
+
+}
+
+
+async function calculate() {
+
+  const button = $("calculate");
+
+  try {
+
+    if(!selectedLocation) {
+      throw new Error(
+        "Seleccione una localidad de las sugerencias."
+      );
+    }
+
+    const year = Number($("year").value);
+
+    if(!Number.isInteger(year) ||
+       year<1800 ||
+       year>2500) {
+
+      throw new Error(
+        "Introduce un año válido entre 1800 y 2500."
+      );
+
+    }
+
+    if(!selectedLocation.timezone) {
+      throw new Error(
+        "No se ha podido determinar la zona horaria de la localidad."
+      );
+    }
+
+    button.disabled = true;
+
+$("chart").innerHTML = "";
+$("events").innerHTML = "";
+$("monthlyResults").innerHTML = "";
+
+annualData = null;
+calculatedYear = null;
+
+$("monthlyStatus").textContent =
+  "Calculando las posiciones del año...";
+
+    setStatus(
+      "Calculando las casas natales...",
+      "info"
+    );
+
+    const cusps = await getNatalCusps();
+
+    setStatus(
+      "Casas natales calculadas. Preparando posiciones del año...",
+      "info"
+    );
+
+const data = await calculateYear(cusps,year);
+
+/* Guardar los datos para la consulta mensual */
+
+annualData = data;
+calculatedYear = year;
+
+/* Dibujar las secciones */
+
+renderChart(data,year);
+renderEvents(data);
+
+renderMonthlyPositions(
+  data,
+  year,
+  Number($("monthSelect").value)
+);
+
+    setStatus(
+      "Cálculo completado. " +
+      data.length + " días analizados.",
+      "success"
+    );
+
+  } catch(error) {
+
+    console.error(error);
+
+    setStatus(
+      "No se pudo completar el cálculo:\n" +
+      error.message,
+      "error"
+    );
+
+  } finally {
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+$("calculate").addEventListener(
+  "click",
+  calculate
+);
+
+/* =========================================
+   CAMBIAR MES DE CONSULTA
+========================================= */
+
+$("monthSelect").addEventListener(
+  "change",
+  () => {
+
+    if(!annualData) {
+
+      $("monthlyStatus").textContent =
+        "Primero debes calcular las posiciones anuales.";
+
+      return;
+
+    }
+
+    renderMonthlyPositions(
+      annualData,
+      calculatedYear,
+      Number($("monthSelect").value)
+    );
+
+  }
+);
+
+</script>
+</body>
+</html>
