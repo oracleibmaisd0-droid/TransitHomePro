@@ -188,6 +188,16 @@ button:disabled {
   gap:8px;
   font-size:12px;
   color:var(--muted);
+  cursor:pointer;
+  user-select:none;
+  padding:6px 8px;
+  border-radius:8px;
+  transition:background .2s, opacity .2s;
+}
+
+.legend-item.active {
+  background:rgba(255,255,255,.10);
+  color:var(--text);
 }
 
 .legend-color {
@@ -422,11 +432,7 @@ h1 {
 <div id="legend" class="legend"></div>
 
 <div class="note">
-  Cada línea representa la trayectoria de un planeta por las casas
-  natales. Los cambios se detectan mediante muestras diarias.
-  Por tanto, la fecha del cambio puede tener un margen aproximado
-  de un día. Una línea discontinua indica movimiento retrógrado.
-</div>
+  Cada línea representa la trayectoria de un planeta por las casas natales. Una línea discontinua indica movimiento retrógrado. Si pulsa en la leyenda de los colores asociados al nombre de un planeta, podrá visualizar solo dicho planeta en la gráfica. Vuelva a pulsar el mismo planeta seleccionado de la leyenda para volver a mostrar todos los planetas en la gráfica.</div>
 
 </section>
 
@@ -578,7 +584,7 @@ let lastSearch = 0;
 
 let annualData = null;
 let calculatedYear = null;
-
+let selectedPlanet = null;
 
 /* =========================================
    AÑO ACTUAL
@@ -1305,77 +1311,94 @@ function renderChart(data,year) {
 
   }
 
-  /* Líneas planetarias */
+/* Líneas planetarias */
 
-  PLANETS.forEach(name => {
+PLANETS.forEach(name => {
 
-    const color = COLORS[name];
+  const color = COLORS[name];
 
-    let path = "";
-    let retroPath = "";
-    let previous = null;
+  let path = "";
+  let retroPath = "";
+  let previous = null;
+  let retroActive = false;
 
-    data.forEach((sample,index) => {
+  data.forEach((sample,index) => {
 
-      const current = sample.planets[name];
+    const current = sample.planets[name];
 
-      const xx = x(index);
-      const yy = y(current.house);
+    const xx = x(index);
+    const yy = y(current.house);
 
-      if(!previous) {
+    if(!previous) {
 
-        path = `M ${xx} ${yy}`;
+      path = `M ${xx} ${yy}`;
 
-      } else {
+    } else {
 
-        const previousX = x(index-1);
-        const previousY = y(previous.house);
+      const previousX = x(index-1);
+      const previousY = y(previous.house);
 
-        path += ` H ${xx} V ${yy}`;
+      /* Trayectoria directa */
+      path += ` H ${xx} V ${yy}`;
 
-        if(previous.retrograde || current.retrograde) {
+      /* Detectar si este tramo pertenece al movimiento retrógrado */
+      const isRetro =
+        previous.retrograde || current.retrograde;
 
-          retroPath +=
-            `M ${previousX} ${previousY}` +
-            ` H ${xx} V ${yy} `;
+      if(isRetro) {
 
+        /* Iniciar un tramo retrógrado continuo */
+        if(!retroActive) {
+          retroPath += ` M ${previousX} ${previousY}`;
         }
+
+        /* Continuar el mismo tramo sin reiniciar el patrón */
+        retroPath += ` H ${xx} V ${yy}`;
 
       }
 
-      previous = current;
-
-    });
-
-    html += `
-      <path
-        d="${path}"
-        fill="none"
-        stroke="${color}"
-        stroke-width="2.3"
-        stroke-linejoin="round"
-        stroke-linecap="round"
-        opacity=".9"
-      />
-    `;
-
-    if(retroPath) {
-
-      html += `
-        <path
-          d="${retroPath}"
-          fill="none"
-          stroke="${color}"
-          stroke-width="3.3"
-          stroke-dasharray="4 4"
-          stroke-linejoin="round"
-          opacity="1"
-        />
-      `;
+      retroActive = isRetro;
 
     }
 
+    previous = current;
+
   });
+
+  /* Trayectoria directa */
+  html += `
+    <path
+      data-planet="${name}"
+      d="${path}"
+      fill="none"
+      stroke="${color}"
+      stroke-width="2.3"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+      opacity=".9"
+    />
+  `;
+
+  /* Superposición discontinua retrógrada */
+  if(retroPath) {
+
+    html += `
+      <path
+        data-planet="${name}"
+        d="${retroPath}"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="2.3"
+        stroke-dasharray="5 4"
+        stroke-linejoin="round"
+        stroke-linecap="butt"
+        opacity="1"
+      />
+    `;
+
+  }
+
+});
 
   /* Etiquetas */
 
@@ -1403,6 +1426,7 @@ function renderChart(data,year) {
   );
 
   renderLegend();
+  updatePlanetVisibility();
 
   $("chartInfo").textContent =
     "Año " + year +
@@ -1412,9 +1436,48 @@ function renderChart(data,year) {
 }
 
 
+
 /* =========================================
-   LEYENDA
+   LEYENDA INTERACTIVA
 ========================================= */
+
+function updatePlanetVisibility() {
+
+  // Mostrar u ocultar las trayectorias
+  document.querySelectorAll("#chart [data-planet]")
+    .forEach(path => {
+
+      const name = path.getAttribute("data-planet");
+
+      path.style.display =
+        selectedPlanet === null ||
+        selectedPlanet === name
+          ? ""
+          : "none";
+
+    });
+
+  // Actualizar la leyenda
+  document.querySelectorAll(".legend-item")
+    .forEach(item => {
+
+      const name = item.dataset.planet;
+
+      item.classList.toggle(
+        "active",
+        selectedPlanet === name
+      );
+
+      item.style.opacity =
+        selectedPlanet !== null &&
+        selectedPlanet !== name
+          ? ".35"
+          : "1";
+
+    });
+
+}
+
 
 function renderLegend() {
 
@@ -1425,6 +1488,13 @@ function renderLegend() {
     const item = document.createElement("div");
 
     item.className = "legend-item";
+    item.dataset.planet = name;
+    item.setAttribute("role", "button");
+    item.setAttribute("tabindex", "0");
+
+    item.title =
+      "Mostrar únicamente " +
+      PLANET_NAMES[name];
 
     item.innerHTML = `
       <span
@@ -1434,11 +1504,37 @@ function renderLegend() {
       <span>${PLANET_NAMES[name]}</span>
     `;
 
+    // Seleccionar o deseleccionar planeta
+    function togglePlanet() {
+
+      selectedPlanet =
+        selectedPlanet === name
+          ? null
+          : name;
+
+      updatePlanetVisibility();
+
+    }
+
+    item.addEventListener("click", togglePlanet);
+
+    item.addEventListener("keydown", event => {
+
+      if(event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        togglePlanet();
+      }
+
+    });
+
     $("legend").appendChild(item);
 
   });
 
+  updatePlanetVisibility();
+
 }
+
 
 
 /* =========================================
