@@ -271,7 +271,18 @@ button:disabled {
 }
 
 .monthly-planet-symbol {
-  font-size:20px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:24px;
+  height:24px;
+  flex-shrink:0;
+}
+
+.monthly-planet-symbol svg {
+  display:block;
+  width:24px;
+  height:24px;
 }
 
 .monthly-positions {
@@ -565,19 +576,92 @@ const PLANET_CODES = {
 };
 
 const PLANET_SYMBOLS = {
-  Sun:"☉",
-  Moon:"☽",
-  Mercury:"☿",
-  Venus:"♀",
-  Mars:"♂",
-  Jupiter:"♃",
-  Saturn:"♄",
-  Uranus:"♅",
-  Neptune:"♆",
-  Pluto:"♇"
+  Sun:"https://commons.wikimedia.org/wiki/Special:FilePath/Sun_symbol_(fixed_width).svg",
+  Moon:"https://commons.wikimedia.org/wiki/Special:FilePath/Moon_symbol_crescent.svg",
+  Mercury:"https://commons.wikimedia.org/wiki/Special:FilePath/Mercury_symbol.svg",
+  Venus:"https://commons.wikimedia.org/wiki/Special:FilePath/Venus_symbol.svg",
+  Mars:"https://commons.wikimedia.org/wiki/Special:FilePath/Male_symbol.svg",
+  Jupiter:"https://commons.wikimedia.org/wiki/Special:FilePath/Jupiter_symbol.svg",
+  Saturn:"https://commons.wikimedia.org/wiki/Special:FilePath/Saturn_symbol.svg",
+  Uranus:"https://commons.wikimedia.org/wiki/Special:FilePath/Uranus_monogram.svg",
+  Neptune:"https://commons.wikimedia.org/wiki/Special:FilePath/Neptune_symbol.svg",
+  Pluto:"https://upload.wikimedia.org/wikipedia/commons/1/13/Pluto_symbol_%28southern_Europe%29.svg"
 };
 
 const $ = id => document.getElementById(id);
+
+/* =========================================
+   SÍMBOLOS SVG PLANETARIOS Y COLORES
+========================================= */
+
+function svgPlanetSymbol(name,size=24) {
+
+  /* Ascendente y Medio Cielo como texto. */
+  if(name==="ASC") name="As";
+  if(name==="MC") name="Mc";
+
+  if(name==="As" || name==="Mc") {
+    return `
+      <svg
+        width="${size}"
+        height="${size}"
+        viewBox="0 0 40 40"
+        xmlns="http://www.w3.org/2000/svg">
+        <text
+          x="2"
+          y="29"
+          fill="#AFAFAF"
+          font-size="22"
+          font-weight="600">
+          ${name}
+        </text>
+      </svg>
+    `;
+  }
+
+  const source=PLANET_SYMBOLS[name];
+
+  if(!source) return "";
+
+  const color=COLORS[name] || "#AFAFAF";
+
+  const hex=color.replace("#","");
+  const r=parseInt(hex.substring(0,2),16)/255;
+  const g=parseInt(hex.substring(2,4),16)/255;
+  const b=parseInt(hex.substring(4,6),16)/255;
+
+  return `
+    <svg
+      width="${size}"
+      height="${size}"
+      viewBox="0 0 ${size} ${size}"
+      xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="planet-color-${name}"
+                color-interpolation-filters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="
+              0 0 0 ${r} 0
+              0 0 0 ${g} 0
+              0 0 0 ${b} 0
+              0 0 0 1 0
+            "
+          />
+        </filter>
+      </defs>
+      <image
+        href="${source}"
+        x="0"
+        y="0"
+        width="${size}"
+        height="${size}"
+        preserveAspectRatio="xMidYMid meet"
+        filter="url(#planet-color-${name})"
+      />
+    </svg>
+  `;
+}
 
 let selectedLocation = null;
 let searchTimeout = null;
@@ -1751,9 +1835,10 @@ function renderMonthlyPositions(data,year,month) {
 
     const symbol = document.createElement("span");
 
-    symbol.className = "monthly-planet-symbol";
-    symbol.textContent = PLANET_SYMBOLS[name];
-    symbol.style.color = COLORS[name];
+symbol.className = "monthly-planet-symbol";
+symbol.innerHTML = svgPlanetSymbol(name,24);
+symbol.style.display = "inline-flex";
+symbol.style.alignItems = "center";
 
     const planetName = document.createElement("span");
 
