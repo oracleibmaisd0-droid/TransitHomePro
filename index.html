@@ -11,13 +11,17 @@
 <style>
 :root {
   color-scheme: dark;
+  --glass-appearance: dark;
+  --glass-accent: #4b9eff;
+  --glass-font: "Product Sans", sans-serif;
+
   --bg:#090d16;
-  --panel:#111827;
-  --panel2:#172235;
+  --panel:rgba(20,29,45,.48);
+  --panel2:rgba(30,45,65,.40);
   --text:#e8eef8;
   --muted:#8d9bb0;
-  --accent:#00d9ff;
-  --border:rgba(255,255,255,.09);
+  --accent:#4b9eff;
+  --border:rgba(255,255,255,.12);
 }
 
 * {
@@ -27,9 +31,21 @@
 body {
   margin:0;
   padding:20px;
-  background:var(--bg);
+
+  background:
+    linear-gradient(
+      rgba(5,9,18,.48),
+      rgba(5,9,18,.65)
+    ),
+    url("https://img.magnific.com/premium-photo/glass-ball-with-planets-universe-it_727939-1323.jpg")
+    center center / cover fixed no-repeat;
+
+  background-color:var(--bg);
+
   color:var(--text);
-  font-family: 'Product Sans', sans-serif;
+  font-family:'Product Sans',sans-serif;
+
+  -webkit-font-smoothing:antialiased;
 }
 
 main {
@@ -55,11 +71,17 @@ h2 {
 }
 
 .panel {
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:17px;
-  margin-bottom:16px;
+  position:relative;
+  display:block;
+
+  background:transparent;
+  border:0;
+  border-radius:15px;
+
+  padding:18px;
+  margin:16px 0;
+
+  overflow:visible;
 }
 
 .form-grid {
@@ -84,51 +106,120 @@ label {
   color:var(--muted);
 }
 
-input,select,button {
+input, select {
   width:100%;
   min-height:43px;
-  border:1px solid var(--border);
-  border-radius:9px;
-  padding:10px;
-  background:var(--panel2);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:11px;
+  padding:10px 12px;
+  background:rgba(24,38,57,.45);
   color:var(--text);
+  font-family:'Product Sans',sans-serif;
   font-size:14px;
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 4px 12px rgba(0,0,0,.12);
 }
 
-button {
-  cursor:pointer;
-  background:#d9ad58;
-  border-color:#d9ad58;
-  font-weight:bold;
-  color:#ffffff;
+input:hover,
+select:hover {
+  border-color:rgba(130,185,255,.28);
+  background:rgba(35,52,75,.52);
 }
 
-button:disabled {
-  opacity:.5;
-  cursor:wait;
+input:focus,
+select:focus {
+  outline:none;
+
+  border-color:rgba(75,158,255,.65);
+
+  background:rgba(30,47,70,.62);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 0 0 3px rgba(75,158,255,.12),
+    0 0 18px rgba(75,158,255,.10);
 }
+
+input::placeholder {
+  color:rgba(180,195,215,.48);
+}
+
+input[type="date"],
+input[type="time"],
+input[type="number"] {
+  color-scheme:dark;
+}
+
+select {
+  appearance:none;
+  -webkit-appearance:none;
+
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239db5d2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
+  background-repeat:no-repeat;
+  background-position:right 13px center;
+  background-size:15px;
+
+  padding-right:38px;
+}
+
+select option {
+  background:#172235;
+  color:#e8eef8;
+}
+
+
 
 .suggestions {
   display:none;
+
   position:relative;
-  background:#1b293d;
-  border:1px solid var(--border);
-  border-radius:9px;
+
+  background:rgba(20,34,52,.72);
+
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+
   overflow:hidden;
   margin-top:5px;
+
+  backdrop-filter:blur(24px) saturate(150%);
+  -webkit-backdrop-filter:blur(24px) saturate(150%);
+
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.07);
 }
 
 .suggestion {
   display:block;
   width:100%;
+
   text-align:left;
+  
+  cursor:pointer;
+  color:var(--text);
+  font-family:'Product Sans',sans-serif;
+  font-size:14px;
+
   border:0;
   border-radius:0;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid rgba(255,255,255,.07);
+
   background:transparent;
+
   padding:12px;
+
   font-weight:normal;
   min-height:auto;
+
+  box-shadow:none;
+
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
 }
 
 .suggestion:last-child {
@@ -136,7 +227,11 @@ button:disabled {
 }
 
 .suggestion:hover {
-  background:#263b55;
+  background:rgba(75,158,255,.13);
+}
+
+.suggestion:active {
+  transform:none;
 }
 
 .status {
@@ -165,14 +260,40 @@ button:disabled {
 
 .chart-scroll {
   overflow-x:auto;
+  overflow-y:hidden;
+
   width:100%;
+
+  border-radius:12px;
+
+  touch-action:pan-x pan-y;
+
+  overscroll-behavior:auto;
+
+  -webkit-overflow-scrolling:touch;
 }
 
 #chart {
   display:block;
+
   width:100%;
   min-width:650px;
   height:auto;
+
+  transform-origin:center center;
+}
+
+/* =========================================
+   FADE IN / FADE OUT DE LÍNEAS PLANETARIAS
+========================================= */
+
+#chart path[data-planet] {
+  opacity:0;
+  transition:opacity 400ms ease;
+}
+
+#chart path[data-planet].visible {
+  opacity:1;
 }
 
 .legend {
@@ -186,17 +307,42 @@ button:disabled {
   display:flex;
   align-items:center;
   gap:8px;
+
   font-size:12px;
   color:var(--muted);
+
   cursor:pointer;
   user-select:none;
-  padding:6px 8px;
-  border-radius:8px;
-  transition:background .2s, opacity .2s;
+
+  padding:8px 10px;
+
+  border-radius:11px;
+
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.025);
+
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+
+  transition:
+    background .2s,
+    opacity .2s,
+    border-color .2s,
+    transform .2s;
+}
+
+.legend-item:hover {
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.12);
+}
+
+.legend-item:active {
+  transform:scale(.97);
 }
 
 .legend-item.active {
-  background:rgba(255,255,255,.10);
+  background:rgba(75,158,255,.13);
+  border-color:rgba(75,158,255,.30);
   color:var(--text);
 }
 
@@ -220,10 +366,21 @@ button:disabled {
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  background:var(--panel2);
-  padding:10px;
-  border-radius:9px;
+
+  background:rgba(25,39,59,.38);
+
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:11px;
+
+  padding:11px;
+
   font-size:12px;
+
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04);
 }
 
 .event-name {
@@ -254,11 +411,20 @@ button:disabled {
 }
 
 .monthly-planet {
-  background:var(--panel2);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:12px;
-  margin-bottom:9px;
+  background:rgba(23,37,57,.38);
+
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:13px;
+
+  padding:13px;
+  margin-bottom:10px;
+
+  backdrop-filter:blur(16px) saturate(130%);
+  -webkit-backdrop-filter:blur(16px) saturate(130%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 5px 15px rgba(0,0,0,.08);
 }
 
 .monthly-planet-title {
@@ -288,26 +454,17 @@ button:disabled {
 .monthly-positions {
   display:flex;
   flex-wrap:wrap;
-  gap:8px;
+  gap:10px;
 }
 
-.monthly-position-link {
-  display:inline-flex;
+.monthly-positions > glass-button {
+  flex:1 1 120px;
+  display:flex;
   flex-direction:column;
+  align-items:center;
+  justify-content:center;
   gap:4px;
-  text-decoration:none;
-  color:var(--text);
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:9px 11px;
-  font-size:12px;
-  transition:background .2s,border-color .2s;
-}
-
-.monthly-position-link:hover {
-  background:rgba(0,217,255,.12);
-  border-color:var(--accent);
+  text-align:center;
 }
 
 .monthly-position-house {
@@ -323,12 +480,6 @@ button:disabled {
   color:var(--muted);
   font-size:13px;
   padding:12px 0;
-}
-
-@media(max-width:600px) {
-  .monthly-position-link {
-    flex:1 1 120px;
-  }
 }
 
 @media(max-width:600px) {
@@ -348,7 +499,158 @@ button:disabled {
 h1 {
     text-align:center;
 }
+
+/* =========================================
+   ELASTIC OVERSCROLL
+========================================= */
+
+html,
+body {
+  overscroll-behavior:none;
+}
+
+main {
+  will-change:transform;
+}
+
+.chart-scroll {
+  overscroll-behavior:auto;
+  touch-action:pan-x pan-y;
+}
+
+#chart {
+  will-change:transform;
+}
+
+@media(max-width:600px) {
+
+  body {
+    padding:12px;
+  }
+
+  .panel {
+    padding:13px;
+  }
+
+  .form-grid {
+    grid-template-columns:1fr;
+  }
+
+  .field.full {
+    grid-column:auto;
+  }
+
+  h1 {
+    font-size:22px;
+  }
+
+}
+
+/* =========================================
+   ANIMACIÓN DEL PANEL DE LOCALIDADES
+========================================= */
+
+@keyframes suggestionsEnter {
+
+  0% {
+    opacity:0;
+    transform:translateY(-12px) scale(.97);
+    filter:blur(5px);
+  }
+
+  60% {
+    opacity:1;
+    filter:blur(0);
+  }
+
+  100% {
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:blur(0);
+  }
+
+}
+
+@keyframes suggestionItemEnter {
+
+  0% {
+    opacity:0;
+    transform:translateY(-7px);
+  }
+
+  100% {
+    opacity:1;
+    transform:translateY(0);
+  }
+
+}
+
+.suggestions {
+  transform-origin:top center;
+
+  animation:
+    suggestionsEnter
+    420ms
+    cubic-bezier(.16,1,.3,1);
+}
+
+.suggestion {
+  animation:
+    suggestionItemEnter
+    350ms
+    cubic-bezier(.16,1,.3,1)
+    both;
+}
+
+.suggestion:nth-child(1) {
+  animation-delay:30ms;
+}
+
+.suggestion:nth-child(2) {
+  animation-delay:55ms;
+}
+
+.suggestion:nth-child(3) {
+  animation-delay:80ms;
+}
+
+.suggestion:nth-child(4) {
+  animation-delay:105ms;
+}
+
+.suggestion:nth-child(5) {
+  animation-delay:130ms;
+}
+
+.suggestion:nth-child(6) {
+  animation-delay:155ms;
+}
+
+.suggestion:nth-child(7) {
+  animation-delay:180ms;
+}
+
+.field.full > glass-button {
+  display:block;
+  width:100%;
+}
+
+.monthly-position-content {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:100%;
+  text-align:center;
+}
 </style>
+
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/glassy-liquid@0.1/dist/glassy-liquid.min.js">
+</script>
+
 </head>
 
 <body>
@@ -365,7 +667,19 @@ h1 {
   Powered by <a href="https://oracleweb-gvtransit.netlify.app">AstroDiamond</a> (un proyecto de <a href="https://oracleweb.netlify.app">Oracle Web</a>).
 </div>
 
-<section class="panel">
+<glass-surface
+  class="panel"
+  radius="15"
+  material="regular"
+  appearance="dark"
+  refraction="24"
+  bezel="12"
+  dispersion="0.12"
+  specular="0.7"
+  tint="rgba(30,65,100,0.12)"
+  interactive
+  style="display:block;padding:18px;margin:16px 0;"
+>
 
 <h2>Datos de nacimiento</h2>
 
@@ -415,7 +729,9 @@ h1 {
   </div>
 
   <div class="field full">
-    <button id="calculate">Calcular casas</button>
+<glass-button id="calculate">
+  Calcular casas
+</glass-button>
   </div>
 
 </div>
@@ -424,9 +740,21 @@ h1 {
   Introduce tus datos y selecciona una localidad.
 </div>
 
-</section>
+</glass-surface>
 
-<section class="panel">
+<glass-surface
+  class="panel"
+  radius="15"
+  material="regular"
+  appearance="dark"
+  refraction="24"
+  bezel="12"
+  dispersion="0.12"
+  specular="0.7"
+  tint="rgba(30,65,100,0.12)"
+  interactive
+  style="display:block;padding:18px;margin:16px 0;"
+>
 
 <h2>Tránsitos por casas</h2>
 
@@ -446,13 +774,24 @@ h1 {
 <div class="note">
   Cada línea representa la trayectoria de un planeta por las casas natales. Una línea discontinua indica movimiento retrógrado. Si pulsa en la leyenda de los colores asociados al nombre de un planeta, podrá visualizar solo dicho planeta en la gráfica. Vuelva a pulsar el mismo planeta seleccionado de la leyenda para volver a mostrar todos los planetas en la gráfica.</div>
 
-</section>
+</glass-surface>
 
 <!-- =========================================
      POSICIONES PLANETARIAS DEL MES
 ========================================= -->
 
-<section class="panel" id="monthlyPositions">
+<glass-surface id="monthlyPositions"
+  class="panel"
+  radius="15"
+  material="regular"
+  appearance="dark"
+  refraction="24"
+  bezel="12"
+  dispersion="0.12"
+  specular="0.7"
+  tint="rgba(30,65,100,0.12)"
+  interactive
+  style="display:block;padding:18px;margin:16px 0;">
 
   <h2>Posiciones planetarias del mes</h2>
 
@@ -491,9 +830,21 @@ h1 {
     las muestras diarias de la gráfica anual.
   </div>
 
-</section>
+</glass-surface>
 
-<section class="panel">
+<glass-surface
+  class="panel"
+  radius="15"
+  material="regular"
+  appearance="dark"
+  refraction="24"
+  bezel="12"
+  dispersion="0.12"
+  specular="0.7"
+  tint="rgba(30,65,100,0.12)"
+  interactive
+  style="display:block;padding:18px;margin:16px 0;"
+>
 
 <h2>Cambios de casa encontrados</h2>
 
@@ -501,7 +852,7 @@ h1 {
   <div class="note">Todavía no hay resultados.</div>
 </div>
 
-</section>
+</glass-surface>
 
 </main>
 
@@ -1528,17 +1879,17 @@ PLANETS.forEach(name => {
 
 function updatePlanetVisibility() {
 
-  // Mostrar u ocultar las trayectorias
-  document.querySelectorAll("#chart [data-planet]")
+  // Fade in / fade out de las líneas planetarias
+  document.querySelectorAll("#chart path[data-planet]")
     .forEach(path => {
 
       const name = path.getAttribute("data-planet");
 
-      path.style.display =
+      const visible =
         selectedPlanet === null ||
-        selectedPlanet === name
-          ? ""
-          : "none";
+        selectedPlanet === name;
+
+      path.classList.toggle("visible", visible);
 
     });
 
@@ -1562,7 +1913,6 @@ function updatePlanetVisibility() {
     });
 
 }
-
 
 function renderLegend() {
 
@@ -1853,17 +2203,17 @@ symbol.style.alignItems = "center";
 
     segments.forEach(segment => {
 
-      const link = document.createElement("a");
+const link = document.createElement("glass-button");
 
-      link.className = "monthly-position-link";
+link.className = "monthly-position-link";
 
-      link.href = createGroupVenusURL(
-        name,
-        segment.house
-      );
+link.setAttribute(
+  "href",
+  createGroupVenusURL(name, segment.house)
+);
 
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
+link.setAttribute("target", "_blank");
+link.setAttribute("rel", "noopener noreferrer");
 
       const house = document.createElement("span");
 
@@ -1894,8 +2244,13 @@ symbol.style.alignItems = "center";
 
       }
 
-      link.appendChild(house);
-      link.appendChild(dates);
+const content = document.createElement("div");
+content.className = "monthly-position-content";
+
+content.appendChild(dates);
+content.appendChild(house);
+
+link.appendChild(content);
 
       link.title =
         PLANET_NAMES[name] +
@@ -2057,6 +2412,280 @@ $("monthSelect").addEventListener(
   }
 );
 
+/* =========================================
+   ELASTIC OVERSCROLL
+========================================= */
+
+(function initElasticOverscroll() {
+
+  let startX = 0;
+  let startY = 0;
+
+  let activeTarget = null;
+  let activeAxis = null;
+
+  const MAX_STRETCH = 55;
+  const STRETCH_FACTOR = 0.22;
+
+  function getTarget(axis, originalTarget) {
+
+    if(axis === "x") {
+
+      const chart = originalTarget.closest(".chart-scroll");
+
+      if(
+        chart &&
+        chart.scrollWidth > chart.clientWidth + 1
+      ) {
+
+        return {
+          element:chart,
+          content:chart.querySelector("#chart"),
+          type:"horizontal"
+        };
+
+      }
+
+      return null;
+
+    }
+
+    const events = originalTarget.closest(".events");
+
+    if(
+      events &&
+      events.scrollHeight > events.clientHeight + 1
+    ) {
+
+      return {
+        element:events,
+        content:events,
+        type:"vertical"
+      };
+
+    }
+
+    return {
+      element:document.scrollingElement,
+      content:document.querySelector("main"),
+      type:"page"
+    };
+
+  }
+
+
+  function isAtEdge(target,axis,delta) {
+
+    const element = target.element;
+
+    if(target.type === "page") {
+
+      const maxScroll =
+        element.scrollHeight - window.innerHeight;
+
+      if(axis === "y") {
+
+        return delta > 0
+          ? window.scrollY <= 0
+          : window.scrollY >= maxScroll - 1;
+
+      }
+
+      return false;
+
+    }
+
+    if(axis === "y") {
+
+      const maxScroll =
+        element.scrollHeight - element.clientHeight;
+
+      return delta > 0
+        ? element.scrollTop <= 0
+        : element.scrollTop >= maxScroll - 1;
+
+    }
+
+    const maxScroll =
+      element.scrollWidth - element.clientWidth;
+
+    return delta > 0
+      ? element.scrollLeft <= 0
+      : element.scrollLeft >= maxScroll - 1;
+
+  }
+
+
+  function applyStretch(target,axis,delta) {
+
+    const content = target.content;
+
+    if(!content) return;
+
+    const distance = Math.min(
+      Math.abs(delta) * STRETCH_FACTOR,
+      MAX_STRETCH
+    );
+
+    const scale = 1 + distance / 1800;
+
+    const direction = delta > 0 ? 1 : -1;
+
+    content.style.transition = "none";
+
+    if(axis === "y") {
+
+      content.style.transformOrigin =
+        direction > 0
+          ? "center top"
+          : "center bottom";
+
+      content.style.transform =
+        `translate3d(0,${distance*direction*.35}px,0) scaleY(${scale})`;
+
+    } else {
+
+      content.style.transformOrigin =
+        direction > 0
+          ? "left center"
+          : "right center";
+
+      content.style.transform =
+        `translate3d(${distance*direction*.35}px,0,0) scaleX(${scale})`;
+
+    }
+
+  }
+
+
+  function releaseStretch() {
+
+    if(!activeTarget || !activeTarget.content) {
+      activeTarget = null;
+      activeAxis = null;
+      return;
+    }
+
+    const content = activeTarget.content;
+
+    content.style.transition =
+      "transform 420ms cubic-bezier(0.22,1,0.36,1)";
+
+    content.style.transform =
+      "translate3d(0,0,0) scale(1)";
+
+    activeTarget = null;
+    activeAxis = null;
+
+  }
+
+
+  document.addEventListener(
+    "touchstart",
+    event => {
+
+      if(event.touches.length !== 1) return;
+
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+
+      activeTarget = null;
+      activeAxis = null;
+
+    },
+    {passive:true}
+  );
+
+
+  document.addEventListener(
+    "touchmove",
+    event => {
+
+      if(event.touches.length !== 1) return;
+
+      const touch = event.touches[0];
+
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+
+      if(
+        Math.max(
+          Math.abs(deltaX),
+          Math.abs(deltaY)
+        ) < 5
+      ) {
+        return;
+      }
+
+      const axis =
+        Math.abs(deltaX) > Math.abs(deltaY)
+          ? "x"
+          : "y";
+
+      const delta =
+        axis === "x"
+          ? deltaX
+          : deltaY;
+
+      const originalTarget =
+        event.target instanceof Element
+          ? event.target
+          : event.target.parentElement;
+
+      if(!originalTarget) return;
+
+      const target = getTarget(
+        axis,
+        originalTarget
+      );
+
+      if(!target || !target.content) {
+        releaseStretch();
+        return;
+      }
+
+      if(!isAtEdge(target,axis,delta)) {
+        releaseStretch();
+        return;
+      }
+
+      if(
+        activeTarget &&
+        (
+          activeTarget.content !== target.content ||
+          activeAxis !== axis
+        )
+      ) {
+        releaseStretch();
+      }
+
+      activeTarget = target;
+      activeAxis = axis;
+
+      applyStretch(
+        target,
+        axis,
+        delta
+      );
+
+    },
+    {passive:false}
+  );
+
+
+  document.addEventListener(
+    "touchend",
+    releaseStretch,
+    {passive:true}
+  );
+
+  document.addEventListener(
+    "touchcancel",
+    releaseStretch,
+    {passive:true}
+  );
+
+})();
 </script>
 </body>
 </html>
