@@ -644,6 +644,14 @@ main {
   width:100%;
   text-align:center;
 }
+
+glass-button{
+  touch-action: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
 </style>
 
 <script
@@ -730,7 +738,7 @@ main {
 
   <div class="field full">
 <glass-button id="calculate">
-  Calcular casas
+  <span>Calcular casas</span>
 </glass-button>
   </div>
 
